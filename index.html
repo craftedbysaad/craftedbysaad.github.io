@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Saad — Web & App Designer</title>
+<meta name="description" content="Saad is a web and app designer from Sangla Hill, Pakistan, based in Bahrain. Apps, custom websites, WordPress and visuals that feel premium.">
+<meta name="theme-color" content="#060506">
+<meta property="og:title" content="Saad — Web & App Designer">
+<meta property="og:description" content="Websites, apps and visuals that feel premium. Watch a team of AI agents build this portfolio live.">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="preload" href="assets/fonts/BigShoulders-Bold.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/fonts/InstrumentSans-Regular.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="css/style.css">
+<script>document.documentElement.classList.add('js');setTimeout(function(){document.documentElement.classList.add('ready')},3000)</script>
+</head>
+<body class="draft">
+<div class="canvas-grid" aria-hidden="true"></div>
+<div class="glow" aria-hidden="true"></div>
+
+<header class="nav" data-scope="hero">
+  <a class="brand" href="#top" data-b="fade" aria-label="Saad, back to top">
+    <span class="brand-mark">S</span><span class="brand-name">Saad.</span>
+  </a>
+  <nav class="nav-links" data-b="fade" aria-label="Sections">
+    <a href="#about">About</a><a href="#projects">Projects</a><a href="#skills">Skills</a><a href="#contact">Contact</a>
+  </nav>
+  <a class="avail" href="#contact" data-b="fade"><i></i>Available for work</a>
+</header>
+
+<main>
+<section class="hero wrap" id="top" data-scope="hero">
+  <div class="hero-word" data-b="wipe" data-d="1150" aria-hidden="true"><span>PORTFOLIO</span></div>
+
+  <div class="hero-grid">
+    <div class="hero-id">
+      <h1 class="hello">
+        <span class="script" data-b="text">Hello, I'm</span>
+        <span class="name" data-b="wipe" data-d="420">SAAD.</span>
+      </h1>
+      <p class="role" data-b="text"><i class="dot" aria-hidden="true"></i>WEB &amp; APP DESIGNER</p>
+    </div>
+
+    <p class="intro" data-b="text">I design and build <strong>websites, apps and visuals</strong> that feel premium — <strong>5 years</strong> of turning ideas into things people actually love to use.</p>
+
+    <div class="ctas">
+      <a class="btn btn-red" href="#projects" data-b="fade">See my work</a>
+      <a class="btn btn-ghost" href="#contact" data-b="fade">Get in touch</a>
+    </div>
+
+    <dl class="stats">
+      <div class="stat" data-b="count"><dt>Years</dt><dd data-to="5" data-suf="+">5+</dd></div>
+      <div class="stat" data-b="count"><dt>Projects</dt><dd data-to="7">7</dd></div>
+      <div class="stat" data-b="count"><dt>Languages</dt><dd data-to="3">3</dd></div>
+    </dl>
+
+    <figure class="portrait" data-b="photo">
+      <div class="portrait-bg"></div>
+      <img src="assets/img/saad.webp" width="800" height="1253" alt="Saad in a black suit and round sunglasses">
+      <figcaption><i class="dot" aria-hidden="true"></i>From Sangla Hill, now in Bahrain</figcaption>
+    </figure>
+
+    <ul class="does" aria-label="What I build">
+      <li data-b="text"><h2>Apps</h2><p>iOS and Android apps with smooth, premium UI.</p></li>
+      <li data-b="text"><h2>Websites</h2><p>Custom-coded sites, and WordPress with a proper backend.</p></li>
+      <li data-b="text"><h2>Visuals</h2><p>Graphics, photo and video edits that stop the scroll.</p></li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<div class="builder" role="status" aria-live="polite" hidden>
+  <span class="b-dots" aria-hidden="true"></span>
+  <span class="b-stat"><b id="bAgents">0</b> agents</span>
+  <span class="b-stat b-layers"><b id="bDone">0</b> / <span id="bTotal">0</span> layers</span>
+  <span class="b-prog" aria-hidden="true"><i id="bProg"></i></span>
+  <span class="b-state" id="bState">Building</span>
+  <button type="button" class="b-btn" id="bSkip">Skip</button>
+  <button type="button" class="b-btn" id="bReplay" hidden>Replay</button>
+</div>
+
+<script src="js/build.js" defer></script>
+</body>
+</html>
