@@ -132,9 +132,9 @@
     requestAnimationFrame(step);
   }
 
-  function flyTo(a, x, y, nearMode) {
+  function flyTo(a, x, y, nearMode, boost) {
     return new Promise(res => {
-      a.lock = null; a.speedK = 1; setMode(a, 'fly'); a.el.classList.remove('gone');
+      a.lock = null; a.speedK = boost || 1; setMode(a, 'fly'); a.el.classList.remove('gone');
       a.tgt = { x, y };
       a.near = nearMode ? { r: 46, fn: () => setMode(a, nearMode) } : null;
       let done = false; const fin = () => { if (!done) { done = true; res(); } };
@@ -204,9 +204,13 @@
     if (el._draw) { el._draw.remove(); el._draw = null; }
     el._state = 'done'; doneCount++; progress();
   }
+  const heroItems = items.filter(el => el.closest('[data-scope="hero"]'));
   function progress() {
     ui.done.textContent = Math.min(doneCount, items.length);
     ui.prog.style.width = (Math.min(doneCount, items.length) / items.length * 100) + '%';
+    // the finished look (glow) fades in while the hero is being built, not after it
+    const f = heroItems.filter(el => el._state === 'done').length / heroItems.length;
+    body.style.setProperty('--bp', Math.min(1, f * 1.6).toFixed(3));
   }
 
   /* ---------- content builders ---------- */
@@ -265,9 +269,10 @@
 
   /* ---------- one agent builds one layer ---------- */
   async function work(a, el, g) {
-    const K = el.closest('[data-scope="hero"]') ? 1 : 0.8;
+    const inHero = !!el.closest('[data-scope="hero"]');
+    const K = inHero ? 1 : (small() ? 0.4 : 0.5);
     let r = docRect(el);
-    await flyTo(a, r.x, r.y, 'cross');
+    await flyTo(a, r.x, r.y, 'cross', inHero ? 1 : 1.45);
     if (g !== gen || el._state === 'done') return;
     r = docRect(el); // layout may have settled while flying
     setMode(a, 'cross');
@@ -312,10 +317,13 @@
   function afterWork() {
     if (!published) {
       const heroLeft = items.some(el => el.closest('[data-scope="hero"]') && el._state !== 'done');
-      if (!heroLeft && agents.every(x => !x.busy)) publish();
+      if (!heroLeft) publish();
       return;
     }
-    if (agents.every(x => !x.busy) && !queue.length) setRest(footVisible ? 'ring' : calmMode());
+    if (agents.every(x => !x.busy) && !queue.length) {
+      if (footVisible) ringLocked = true;
+      setRest(ringLocked ? 'ring' : calmMode());
+    }
   }
 
   /* ---------- publish ---------- */
@@ -324,27 +332,28 @@
     body.classList.remove('draft');
     bar.classList.add('live');
     ui.state.textContent = 'Live'; ui.skip.hidden = true; ui.replay.hidden = false;
-    setRest(footVisible ? 'ring' : calmMode());
+    if (footVisible) ringLocked = true;
+    setRest(ringLocked ? 'ring' : calmMode());
+    body.style.setProperty('--bp', '1');
   }
 
   /* ---------- scroll-triggered scopes + finale ring ---------- */
-  let footVisible = false;
+  let footVisible = false, ringLocked = false;
   function watch(g) {
     observers.forEach(o => o.disconnect()); observers = [];
-    const scopes = [...document.querySelectorAll('[data-scope]:not([data-scope="hero"])')];
+    // each layer below the hero is queued as it nears the viewport, so building follows the scroll
     const so = new IntersectionObserver(entries => entries.forEach(en => {
       if (!en.isIntersecting || g !== gen) return;
-      so.unobserve(en.target);
-      const list = [...en.target.querySelectorAll('[data-b]')];
-      enqueue(list, g);
-      // never leave a visitor staring at an empty section
-      timers.push(setTimeout(() => { if (g !== gen) return; list.forEach(el => { if (el._state !== 'done') { queue = queue.filter(q => q !== el); finishEl(el); } }); }, 7000));
-    }), { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-    scopes.forEach(s => so.observe(s));
+      const el = en.target; so.unobserve(el);
+      enqueue([el], g);
+      // never leave a visitor staring at an empty block
+      timers.push(setTimeout(() => { if (g !== gen || el._state === 'done') return; queue = queue.filter(q => q !== el); finishEl(el); }, 4000));
+    }), { threshold: 0, rootMargin: '0px 0px 25% 0px' });
+    items.filter(el => !el.closest('[data-scope="hero"]')).forEach(el => so.observe(el));
     const fo = new IntersectionObserver(([en]) => {
       footVisible = en.isIntersecting;
-      if (!published || g !== gen) return;
-      if (agents.every(x => !x.busy) && !queue.length) setRest(footVisible ? 'ring' : calmMode());
+      if (!published || g !== gen || ringLocked) return;
+      if (footVisible && agents.every(x => !x.busy) && !queue.length) { ringLocked = true; setRest('ring'); }
     }, { threshold: 0.6 });
     if (footMark) fo.observe(footMark);
     observers.push(so, fo);
@@ -364,7 +373,7 @@
       const off = a.group * Math.PI / 2 + (Math.floor(a.i / 4)) * 0.32, R = 62 + (a.i % 3) * 9;
       a.tgt = t => ({ x: cx + Math.cos(off + t * 2.1) * R * 1.2, y: cy + Math.sin(off + t * 2.1) * R, keep: true });
     });
-    await wait(small() ? 1500 : 1900);
+    await wait(small() ? 1300 : 1600);
     if (g !== gen) { scan.remove(); return; }
     scan.classList.add('out'); setTimeout(() => scan.remove(), 450);
     agents.forEach(a => { const dx = a.x - cx, dy = a.y - cy, d = Math.hypot(dx, dy) || 1; a.vx = dx / d * 900; a.vy = dy / d * 900; });
@@ -384,9 +393,10 @@
 
   async function start() {
     const g = ++gen;
-    queue = []; doneCount = 0; published = false;
+    queue = []; doneCount = 0; published = false; ringLocked = false;
     timers.forEach(clearTimeout); timers = [];
     drawLayer.innerHTML = '';
+    body.style.setProperty('--bp', '0');
     arm();
     body.classList.add('draft');
     bar.hidden = false; bar.classList.remove('live');
